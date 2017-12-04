@@ -13633,7 +13633,7 @@ function parse_dur(line) {
 
 // parse the note accidental and pitch
 function parse_acc_pit(line) {
-	var	note, acc, micro_n, micro_d, pit, nd,
+	var	note, acc, micro_n, micro_d, pit, nd, note_name,
 		c = line.char()
 
 	// optional accidental
@@ -13676,6 +13676,7 @@ function parse_acc_pit(line) {
 	}
 
 	/* get the pitch */
+	note_name = c;
 	pit = ntb.indexOf(c) + 16;
 	c = line.next_char()
 	if (pit < 16) {
@@ -13693,6 +13694,7 @@ function parse_acc_pit(line) {
 		c = line.next_char()
 	}
 	note = {
+		note_name: note_name,
 		pit: pit,
 		apit: pit,
 		shhd: 0,
@@ -16092,7 +16094,7 @@ function out_XYAB(str, x, y, a, b, note, part_name, current_time, id) {
 		case 'N': return note ? JSON.stringify(note).replace(/"/g, "&quot;") : ''
 		case 'T': return current_time
 		case 'P': return part_name
-		case 'D': return id
+		case 'D': return 'johnny' + id
 //		case 'G':
 		default: return b.toFixed(2)
 		}
@@ -16105,7 +16107,7 @@ function out_XYAB(str, x, y, a, b, note, part_name, current_time, id) {
 			x: x,
 			y: y
 		},
-		id: id
+		id: 'johnny' + id
 	});
 }
 
@@ -16175,7 +16177,7 @@ function xygl(x, y, gl, note, part_name, current_time) {
 	var 	tgl = tgls[gl]
 	if (tgl && !glyphs[gl]) {
 		out_XYAB('<text id="D" x="X" y="Y" note="N" partname="P" time="T">A</text>\n',
-			x + tgl.x * stv_g.scale, y + tgl.y, tgl.c, null, note, part_name, current_time, 'johnny' + curr_note_id++)
+			x + tgl.x * stv_g.scale, y + tgl.y, tgl.c, null, note, part_name, current_time, curr_note_id++)
 		// if (note) {
 		// 	out_XYAB('<rect class="noterect" x="X" y="Y" note="N" partname="P" time="T" width="15" height="15" style="fill:blue;fill-opacity:0.1;"></rect>',
 		// 		x + tgl.x * stv_g.scale, y + tgl.y, tgl.c, null, note, part_name, current_time)
@@ -16204,9 +16206,14 @@ function out_acciac(x, y, dx, dy, up) {
 }
 // simple /dotted measure bar
 function out_bar(x, y, h, dotted) {
+	const curr_xcoord = x + posx;
+	if (score_position_info.measure_xcoords[score_position_info.measure_xcoords.length - 1] !== curr_xcoord ||
+		score_position_info.measure_xcoords.length === 0) {
+		score_position_info.measure_xcoords.push(curr_xcoord);
+	}
 	output.push('<path class="stroke" stroke-width="1" ' +
 		(dotted ? 'stroke-dasharray="5,5" ' : '') +
-		'd="m' + (x + posx).toFixed(2) +
+		'd="m' + curr_xcoord.toFixed(2) +
 		' ' + (posy - y).toFixed(2) + 'v' + (-h).toFixed(2) +
 		'"/>\n')
 }
@@ -16364,9 +16371,15 @@ function out_stem(x, y, h, grace,
 function out_thbar(x, y, h) {
 	x += posx + 1.5;
 	y = posy - y;
+    const curr_xcoord = x;
+	if (score_position_info.measure_xcoords[score_position_info.measure_xcoords.length - 1] !== curr_xcoord ||
+		score_position_info.measure_xcoords.length === 0) {
+		score_position_info.measure_xcoords.push(curr_xcoord);
+	}
 	output.push('<path class="stroke" stroke-width="3" d="m' +
-		x.toFixed(2) + ' ' + y.toFixed(2) +
+		curr_xcoord.toFixed(2) + ' ' + y.toFixed(2) +
 		'v' + (-h).toFixed(2) + '"/>\n')
+
 }
 // tremolo
 function out_trem(x, y, ntrem) {

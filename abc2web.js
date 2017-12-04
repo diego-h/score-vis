@@ -300,6 +300,7 @@ var msc_VERSION = 42,
         $("#impbox").prop("checked") || (lpRec = void 0);
         var d = new FileReader;
         d.onload = function(b) {
+            notes_glob = []; // in diego.js
             A(d.result)
         };
         var g = "dd" == b ? c[0] : $("#fknp").prop("files")[0];
