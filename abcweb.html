@@ -56,7 +56,7 @@ body { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -web
 <div id="buttons">
     <div style="height: 5px;"></div>
     <span id="sync">
-        <div id="menu"><div id="mbar" style="padding: 4px;">Menu</div>
+        <div id="menu" hidden><div id="mbar" style="padding: 4px;">Menu</div>
             <label id="snclbl">enable sync<input id="synbox" type="checkbox" accesskey="e"/></label>
             <label>speed ctrl<input id="spdctl" type="checkbox"/></label>
             <label>loop mode<input id="lopctl" type="checkbox"/></label>
@@ -83,13 +83,15 @@ body { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -web
     </span>
     <div id="medbts">
         <label><span id="abclbl">score file: </span><div id="abcfile"><input type="file" id="fknp" accept=".abc,.xml,.js" tabindex="1"/></div></label>
-        <label id="medlbl">media file: <div id="mediafile"><input type="file" id="mknp" accept="audio/*, video/*" tabindex="2"/></div></label>
-        <label id="yvdlbl">youtube id: <div id="yubfile">
-            <input type="text" id="yubid" size="11" value="qx-ymShyfIk" title="11 characters" pattern="[A-Za-z0-9\-_]{11}"/>
-            <input type="button" id="yknp" value="load"/>
-        </div></label>
-        <label id="drplbl">use dropbox:<input id="drpuse" type="checkbox" tabindex="3"/></label>
-        <label id="yublbl">use youtube:<input id="yubuse" type="checkbox" tabindex="4"/></label>
+        <div hidden>
+            <label id="medlbl">media file: <div id="mediafile"><input type="file" id="mknp" accept="audio/*, video/*" tabindex="2"/></div></label>
+            <label id="yvdlbl">youtube id: <div id="yubfile">
+                <input type="text" id="yubid" size="11" value="qx-ymShyfIk" title="11 characters" pattern="[A-Za-z0-9\-_]{11}"/>
+                <input type="button" id="yknp" value="load"/>
+            </div></label>
+            <label id="drplbl">use dropbox:<input id="drpuse" type="checkbox" tabindex="3"/></label>
+            <label id="yublbl">use youtube:<input id="yubuse" type="checkbox" tabindex="4"/></label>
+        </div>
         <button onclick="moveScore(-1)">Back 1 measure</button>
         <button onclick="moveScore(1)">Forward 1 measure</button>
     </div>

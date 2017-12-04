@@ -27,6 +27,7 @@ var score_position_info = {
 	measure_xcoords: [],
 	current_measure: 0
 }
+var curr_selected_note = {id: -1};
 
 function matchNotes(a, b) {
 	// Test for note-name matching.
@@ -40,6 +41,11 @@ function matchNotes(a, b) {
 	if (a_end <= b_start || b_end <= a_start) return false;
 
 	return true;
+}
+
+function hideWijzer() {
+	// Make the wijzer invisible (a feature we don't want right now)
+	d3.select('#shade').attr('fill-opacity', 0);
 }
 
 function moveScore(index_delta) {
@@ -90,24 +96,45 @@ function initializeRectangleActions() {
 		const difference = +nextNote.attributes.x.value - +document.getElementById(d.id).attributes.x.value;
 		return difference > 0 ? difference : 15;
 	};
+	const clearAllHighlights = () => {
+		d3.selectAll('.noterect').style('fill', 'white')
+	                             .style('fill-opacity', 0)
+	                             .style('stroke-width', 0);
+	};
 	// Add note rectangles.
 	d3.select('.music').selectAll('.noterect')
 		.data(notes_glob)
 		.enter().append('rect')
 		.attr('class', 'noterect')
 		.attr('x', d => +document.getElementById(d.id).attributes.x.value)
-		.attr('y', d => +document.getElementById(d.id).attributes.y.value)
+		.attr('y', d => +document.getElementById(d.id).attributes.y.value - 7)
 		.attr('height', 15)
 		.attr('width', d => calculateNoteHighlightWidth(d))
-		.style('fill', 'blue')
-		.style('fill-opacity', 0.1)
+		.style('fill', 'white')
+		.style('fill-opacity', 0)
 	    .on('mouseover', function(d_curr) {
+	    	if (curr_selected_note.id !== -1) return;
 	    	d3.selectAll('.noterect')
 	    		.filter(d => matchNotes(d, d_curr))
-	    		.style('fill', 'orange');
+	    		.style('fill', 'orange')
+	    		.style('fill-opacity', 0.25);
 	    	console.log(d_curr.data);
 	    })
 	    .on('mouseleave', function() {
-	    	d3.selectAll('.noterect').style('fill', 'blue');
+	    	if (curr_selected_note.id === -1) {
+	    		clearAllHighlights();
+	    	}
+	    })
+	    .on('click', function(d_curr) {
+	    	if (curr_selected_note.id === -1) {
+	    		d3.select(this).style('stroke-width', 3).style('stroke', 'black');
+	    		curr_selected_note = d_curr;
+	    		return;
+	    	}
+	    	d3.select(this).style('stroke-width', 0);
+	    	if (curr_selected_note.id === d_curr.id) {
+	    		curr_selected_note = {id: -1};
+	    		clearAllHighlights();
+	    	}
 	    });
 };

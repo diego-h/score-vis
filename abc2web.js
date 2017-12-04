@@ -188,7 +188,8 @@ var msc_VERSION = 42,
         this.shade = $(document.createElementNS("http://www.w3.org/2000/svg", "rect"));
         this.shade.attr({
             width: "100%",
-            height: "100%"
+            height: "100%",
+            id: "shade"
         });
         this.wijzer.append(this.shade);
         this.tiktak = $(document.createElementNS("http://www.w3.org/2000/svg", "text"));
@@ -231,7 +232,8 @@ var msc_VERSION = 42,
         this.tixlb = f;
         this.lbtix = e;
         this.repcnt = 1;
-        this.noCursor = 0
+        this.noCursor = 0;
+        hideWijzer();
     }
 
     function n() {
