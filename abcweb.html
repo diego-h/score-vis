@@ -94,6 +94,7 @@ body { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -web
         </div>
         <button onclick="moveScore(-1)">Back 1 measure</button>
         <button onclick="moveScore(1)">Forward 1 measure</button>
+        <select id="partselection" onchange="matchPart(parts[this.selectedIndex]);"></select>
     </div>
     <div id="meddiv">
         <audio id="aud" controls="controls">Your browser does not support the audio element.</audio>

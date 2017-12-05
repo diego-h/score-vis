@@ -1160,7 +1160,7 @@ var msc_VERSION = 42,
             f = g.scrollLeft(),
             e =
             f + g.width() - this.hmargin;
-        opt.lncsr ? (this.wijzer.attr("x", b.toFixed(2)), this.wijzer.attr("width", "2"), this.shade.attr("fill-opacity", this.noCursor ? "0.0" : "0.5"), b /= this.scale, (b > e || b < f + this.hmargin) && g.scrollLeft(b - this.hmargin)) : (this.wijzer.attr("x", c.toFixed(2)), this.wijzer.attr("width", (d - c).toFixed(2)), this.shade.attr("fill-opacity", this.noCursor ? "0.0" : "" + opt.opacity), c /= this.scale, d /= this.scale, (d > e || c < f + this.hmargin) && g.scrollLeft(c - this.hmargin))
+        // opt.lncsr ? (this.wijzer.attr("x", b.toFixed(2)), this.wijzer.attr("width", "2"), this.shade.attr("fill-opacity", this.noCursor ? "0.0" : "0.5"), b /= this.scale, (b > e || b < f + this.hmargin) && g.scrollLeft(b - this.hmargin)) : (this.wijzer.attr("x", c.toFixed(2)), this.wijzer.attr("width", (d - c).toFixed(2)), this.shade.attr("fill-opacity", this.noCursor ? "0.0" : "" + opt.opacity), c /= this.scale, d /= this.scale, (d > e || c < f + this.hmargin) && g.scrollLeft(c - this.hmargin))
     };
     m.prototype.time2x = function(b, c) {
         if (!S) {
