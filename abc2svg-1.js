@@ -5438,7 +5438,7 @@ function draw_vname(indent) {
 			y -= (staff_tb[st].y - staff_tb[n].y) * .5
 		for (n = 0; n < a_p.length; n++) {
 			p = a_p[n];
-			xy_str(indent, y, p, "c");
+			xy_str(indent, y, p, "c", 'n/a (shouldnt be used)', true);
 			y -= 18
 		}
 	}
@@ -14938,7 +14938,15 @@ function out_str(str) {
 //	otherwise align left
 function xy_str(x, y, str,
 		 action,
-		 line_w) {
+		 line_w,
+		 is_vname) {
+	if (is_vname) {
+		parts_positions.push({
+			part_name: str,
+			x_center: sx(x),
+			y: sy(y)
+		});
+	}
 	output.push('<text class="f' + gene.curfont.fid + cfmt.fullsvg + '" x="');
 	out_sxsy(x, '" y="', y)
 	switch (action) {

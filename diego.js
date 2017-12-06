@@ -49,6 +49,7 @@ var eflat_notename_conversions = {
 	'G': 'B'
 };
 var matchingNotesClasses = [];
+var parts_positions = []; // part_name, x_center, y
 
 function noteMatchesWithPart(note, part_name) {
 	for (var i = 0; i < notes_glob.length; i++) {
@@ -95,7 +96,7 @@ function matchPart(part_name) {
 				.attr('y', d => +document.getElementById(d.id).attributes.y.value - 7) // keep the matching note's y-coord
 	    		.attr('width', d => Math.abs(getMatchingXEnd(note, d) - getMatchingX(note, d)))
 	    		.attr('height', 15)
-	    		.style('fill', 'orange')
+	    		.style('fill', 'blue')
 	    		.style('fill-opacity', 0.5)
 	    		.style('pointer-events', 'none');
 	    	matchingNotesClasses.push('matchingpartrect' + note.id);
@@ -145,6 +146,19 @@ function moveScore(index_delta) {
 
 function initializeRectangleActions() {
 	matchingNotesClasses = [];
+
+	// Make rects to highlight part names.
+	d3.select('.music').selectAll('.partnamerect')
+		.data(parts_positions)
+		.enter().append('rect')
+		.attr('class', 'partnamerect')
+		.attr('x', d => d.x_center - 60)
+		.attr('y', d => d.y - 13)
+		.attr('height', 20)
+		.attr('width', 120)
+		.style('fill', 'white')
+		.style('fill-opacity', 0)
+		.lower();
 
 	// Populate the array of parts and use it to populate dropdown.
 	parts = ['None'];
@@ -203,26 +217,14 @@ function initializeRectangleActions() {
 		return 15;
 	};
 	const clearAllHighlights = () => {
+		// TODO: clear all highlights except the selected ones.
 		d3.selectAll('.noterect').style('fill', 'white')
 	                             .style('fill-opacity', 0)
 	                             .style('stroke-width', 0);
+	    d3.selectAll('.partnamerect').style('fill', 'white')
+	                             .style('fill-opacity', 0)
+	                             .style('stroke-width', 0);
 	};
-	// Add part rectangles (highlighted upon part selection).
-	// d3.select('.music').selectAll('.partrect')
-	// 	.data(notes_glob)
-	// 	.enter().append('rect')
-	// 	.attr('class', 'partrect')
-	// 	.attr('x', d => +document.getElementById(d.id).attributes.x.value)
-	// 	.attr('y', d => +document.getElementById(d.id).attributes.y.value - 7)
-	// 	.attr('height', 15)
-	// 	.attr('width', d => {
-	// 		const highlight_width = calculateNoteHighlightWidth(d);
-	// 		d.highlight_width = highlight_width; // cache the highlight width in notes_glob.
-	// 		return highlight_width;
-	// 	})
-	// 	.style('fill', 'white')
-	// 	.style('fill-opacity', 0)
-	// Add note rectangles (highlighted upon hover).
 	d3.select('.music').selectAll('.noterect')
 		.data(notes_glob)
 		.enter().append('rect')
@@ -237,14 +239,20 @@ function initializeRectangleActions() {
 		})
 		.style('fill', 'white')
 		.style('fill-opacity', 0)
+		// .lower() // this puts the highlights behind the notes, but apparently pointer events stop at note heads :(
 	    .on('mouseover', function(d_curr) {
 	    	if (curr_selected_note.id !== -1) return;
-	    	d3.selectAll('.noterect')
+	    	const selected_note_rects = d3.selectAll('.noterect')
 	    		.filter(d => matchNotes(d, d_curr))
 	    		.style('fill', 'yellow')
+	    		.style('fill-opacity', 0.5);
+	    	const shouldPartNameRectBeHighlighted = (selected_note_rects, part_position_datum) =>
+				selected_note_rects.find(note_rect => note_rect.part === part_position_datum.part_name);
+	    	d3.selectAll('.partnamerect')
+	    		.filter(d => shouldPartNameRectBeHighlighted(selected_note_rects.data(), d))
+	    		.style('fill', 'yellow')
 	    		.style('fill-opacity', 0.5)
-	    		.style('z-index', -1);
-	    	console.log(d_curr.data);
+	    	console.log(d_curr);
 	    })
 	    .on('mouseleave', function() {
 	    	if (curr_selected_note.id === -1) {
@@ -252,12 +260,14 @@ function initializeRectangleActions() {
 	    	}
 	    })
 	    .on('click', function(d_curr) {
+	    	// If no note is currently selected, select the clicked note.
 	    	if (curr_selected_note.id === -1) {
 	    		d3.select(this).style('stroke-width', 3).style('stroke', 'black');
 	    		curr_selected_note = d_curr;
 	    		return;
 	    	}
 	    	d3.select(this).style('stroke-width', 0);
+	    	// If the user clicked an already-selected note, unselect it and clear highlights.
 	    	if (curr_selected_note.id === d_curr.id) {
 	    		curr_selected_note = {id: -1};
 	    		clearAllHighlights();
