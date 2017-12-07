@@ -19,7 +19,7 @@ audio     { display: none; margin-right:5px; vertical-align:middle; z-index:1; p
 #vid, #vidyub { display: none; margin-right:5px; vertical-align:middle; height:100%; z-index:1; position: relative; }
 #meddiv   { text-align: center; height:95%; visibility:hidden; }
 #crediv   { display: inline-block; vertical-align:middle; text-align: left; font-size: small; z-index:1; position: relative; }
-#medbts   { position: absolute; left: 5px; font-size:small; visibility:hidden; }
+#medbts   { position: absolute; left: 5px; font-size:small; visibility:hidden; padding-left: 300px;}
 #medlbl   { display: block; margin-top: 5px; }
 #yvdlbl   { display: none; margin-top: 5px; }
 #drplbl, #yublbl { display: inline-block; }
@@ -82,7 +82,9 @@ body { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -web
         </div>
     </span>
     <div id="medbts">
-        <label><span id="abclbl">score file: </span><div id="abcfile"><input type="file" id="fknp" accept=".abc,.xml,.js" tabindex="1"/></div></label>
+        <span id="abclbl">score file: </span><div id="abcfile"><input type="file" id="fknp" accept=".abc,.xml,.js" tabindex="1"/></div>
+        <button onclick="moveOrScaleScore(0, -0.10)">Zoom out</button>
+        <button onclick="moveOrScaleScore(0, 0.10)">Zoom in</button>
         <div hidden>
             <label id="medlbl">media file: <div id="mediafile"><input type="file" id="mknp" accept="audio/*, video/*" tabindex="2"/></div></label>
             <label id="yvdlbl">youtube id: <div id="yubfile">
@@ -92,9 +94,11 @@ body { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -web
             <label id="drplbl">use dropbox:<input id="drpuse" type="checkbox" tabindex="3"/></label>
             <label id="yublbl">use youtube:<input id="yubuse" type="checkbox" tabindex="4"/></label>
         </div>
-        <button onclick="moveScore(-1)">Back 1 measure</button>
-        <button onclick="moveScore(1)">Forward 1 measure</button>
+        <button onclick="moveOrScaleScore(-1, 0)">Scroll back</button>
+        <button onclick="moveOrScaleScore(1, 0)">Scroll forward</button>
         <select id="partselection" onchange="matchPart(parts[this.selectedIndex]);"></select>
+        <button onclick="advanceSelectedNote(-1)">Previous note</button>
+        <button onclick="advanceSelectedNote(1)">Next note</button>
     </div>
     <div id="meddiv">
         <audio id="aud" controls="controls">Your browser does not support the audio element.</audio>

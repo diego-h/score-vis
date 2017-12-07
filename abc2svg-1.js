@@ -15679,12 +15679,18 @@ Abc.prototype.header_footer = function(str) {
 // You should have received a copy of the GNU Lesser General Public License
 // along with abc2svg-core.  If not, see <http://www.gnu.org/licenses/>.
 
+// Old style
+// style = '\n.fill {fill: currentColor}\
+// \n.stroke {stroke: currentColor; fill: none}\
+// \ntext {white-space: pre}\
+// \n.music {font-family: music; font-size: 24px; fill: currentColor}\
+// \n.music text, .music tspan {fill:currentColor}'
+
 var	output = [],		// output buffer
-	style = '\n.fill {fill: currentColor}\
-\n.stroke {stroke: currentColor; fill: none}\
+	style = '\n.fill {fill: gray}\
+\n.stroke {stroke: gray; fill: none}\
 \ntext {white-space: pre}\
-\n.music {font-family: music; font-size: 24px; fill: currentColor}\
-\n.music text, .music tspan {fill:currentColor}',
+\n.music {font-family: music; font-size: 24px; fill: gray}',
 	font_style = '',
 	posx = cfmt.leftmargin / cfmt.scale,	// default x offset of the images
 	posy = 0,		// y offset in the block

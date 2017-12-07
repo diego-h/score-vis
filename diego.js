@@ -17,7 +17,7 @@ typedef note {
 */
 var notes_glob = [];
 var curr_note_id = 0;
-var scale_factor = '0.9';
+var scale_factor = 2.0;
 var x_offset = 0;
 var view_dimensions = {
 	height: 1500,
@@ -73,14 +73,29 @@ function getMatchingXEnd(note, d) {
 }
 
 function matchPart(part_name) {
+	console.log('matchPart called with part_name ' + part_name + ' and curr_selected_part ' + curr_selected_part);
+	if (curr_selected_part === 'None' && part_name !== 'None') {
+		d3.selectAll('text').attr('fill', 'gray');
+		d3.selectAll('.stroke').attr('stroke', 'gray');
+		d3.selectAll('.fill').attr('fill', 'gray');
+	}
+	if (curr_selected_part !== 'None' && part_name === 'None') {
+		d3.selectAll('text').attr('fill', 'gray');
+		d3.selectAll('.stroke').attr('stroke', 'gray');
+		d3.selectAll('.fill').attr('fill', 'gray');
+	}
+
+
 	if (part_name === 'None' || part_name !== curr_selected_part) {
 		d3.selectAll('.partrect')
 			.style('fill', 'white')
 			.style('fill-opacity', 0);
 		matchingNotesClasses.forEach(className => d3.selectAll('.' + className).remove());
 		matchingNotesClasses = [];
-		if (part_name === 'None') return;
 	}
+
+	curr_selected_part = part_name;
+	if (part_name === 'None') return;
 
 	// Create rects for matching notes.
 	notes_glob.forEach(note => {
@@ -131,17 +146,59 @@ function hideWijzer() {
 	setTimeout(() => d3.select('#shade').attr('fill-opacity', 0), 2000);
 }
 
-function moveScore(index_delta) {
+function moveOrScaleScore(index_delta, scale_factor_delta) {
 	if (score_position_info.current_measure + index_delta < 0 ||
 		score_position_info.current_measure + index_delta >= score_position_info.measure_xcoords.length) {
 		return;
 	}
 	score_position_info.current_measure += index_delta;
+	scale_factor += scale_factor_delta;
 	x_offset = -score_position_info.measure_xcoords[score_position_info.current_measure];
 	d3.select('.music')
-	  .attr('transform', 'scale(' + scale_factor + ')translate(' + x_offset.toFixed(2) + ', 0)');
+	  .attr('transform', 'scale(' + scale_factor + ')translate(' + (x_offset).toFixed(2) + ', 0)');
 	d3.select('#score-clip')
-	  .attr('transform', 'translate(' + -x_offset + ', 0)');
+	  .attr('transform', 'translate(' + (-x_offset) + ', 0)');
+}
+
+function clearAllHighlights() {
+	// TODO: clear all highlights except the selected ones.
+	d3.selectAll('.noterect').style('fill', 'white')
+                             .style('fill-opacity', 0)
+                             .style('stroke-width', 0);
+    d3.selectAll('.partnamerect').style('fill', 'white')
+                             .style('fill-opacity', 0)
+                             .style('stroke-width', 0);
+}
+
+function highlightNoteRectsAndPartNameRects(note_datum) {
+	const selected_note_rects = d3.selectAll('.noterect')
+		.filter(d => matchNotes(d, note_datum))
+		.style('fill', 'yellow')
+		.style('fill-opacity', 0.5);
+	const shouldPartNameRectBeHighlighted = (selected_note_rects, part_position_datum) =>
+		selected_note_rects.find(note_rect => note_rect.part === part_position_datum.part_name);
+	d3.selectAll('.partnamerect')
+		.filter(d => shouldPartNameRectBeHighlighted(selected_note_rects.data(), d))
+		.style('fill', 'yellow')
+		.style('fill-opacity', 0.5)
+	console.log(note_datum);
+}
+
+function advanceSelectedNote(index_delta) {
+	if (curr_selected_note.id === -1) return;
+
+	const index = notes_glob.indexOf(curr_selected_note);
+	if (index + index_delta >= notes_glob.length ||
+		index + index_delta < 0) return;
+
+	clearAllHighlights();
+	curr_selected_note = notes_glob[index + index_delta];
+	highlightNoteRectsAndPartNameRects(curr_selected_note);
+	const new_selected_noterect = d3.selectAll('.noterect')
+		.filter(d => d.id === curr_selected_note.id)
+		.style('stroke-width', 3).style('stroke', 'black');
+	
+	const selected_note_xcoord = new_selected_noterect.attr('x');
 }
 
 function initializeRectangleActions() {
@@ -159,6 +216,9 @@ function initializeRectangleActions() {
 		.style('fill', 'white')
 		.style('fill-opacity', 0)
 		.lower();
+
+	// Sort the array of notes by id.
+	notes_glob.sort((a,b) => +parseInt(a.id.substring(6)) - +parseInt(b.id.substring(6)));
 
 	// Populate the array of parts and use it to populate dropdown.
 	parts = ['None'];
@@ -182,6 +242,7 @@ function initializeRectangleActions() {
 	score_position_info.measure_xcoords.push(0); // For the beginning!
 	score_position_info.measure_xcoords.sort((a, b) => a - b);
 	score_position_info.current_measure = 0;
+	moveOrScaleScore(0, 0);
 
 	// Correct svg configurations.
 	x_offset = 0;
@@ -207,23 +268,16 @@ function initializeRectangleActions() {
 		const nextNote = document.getElementById(idOfNextNote);
 		if (!nextNote) return 15;
 		const difference = +nextNote.attributes.x.value - +document.getElementById(d.id).attributes.x.value;
+		if (difference > 200) return 15;
 		if (difference > 0) return difference - 3;
 
 		const idOfNextNextNote = 'johnny' + (+parseInt(d.id.substring(6)) + 2);
 		const nextNextNote = document.getElementById(idOfNextNextNote);
 		if (!nextNextNote) return 15;
 		const nextDifference = +nextNextNote.attributes.x.value - +document.getElementById(d.id).attributes.x.value;
+		if (nextDifference > 200) return 15;
 		if (nextDifference > 0) return nextDifference - 3;
 		return 15;
-	};
-	const clearAllHighlights = () => {
-		// TODO: clear all highlights except the selected ones.
-		d3.selectAll('.noterect').style('fill', 'white')
-	                             .style('fill-opacity', 0)
-	                             .style('stroke-width', 0);
-	    d3.selectAll('.partnamerect').style('fill', 'white')
-	                             .style('fill-opacity', 0)
-	                             .style('stroke-width', 0);
 	};
 	d3.select('.music').selectAll('.noterect')
 		.data(notes_glob)
@@ -242,17 +296,7 @@ function initializeRectangleActions() {
 		// .lower() // this puts the highlights behind the notes, but apparently pointer events stop at note heads :(
 	    .on('mouseover', function(d_curr) {
 	    	if (curr_selected_note.id !== -1) return;
-	    	const selected_note_rects = d3.selectAll('.noterect')
-	    		.filter(d => matchNotes(d, d_curr))
-	    		.style('fill', 'yellow')
-	    		.style('fill-opacity', 0.5);
-	    	const shouldPartNameRectBeHighlighted = (selected_note_rects, part_position_datum) =>
-				selected_note_rects.find(note_rect => note_rect.part === part_position_datum.part_name);
-	    	d3.selectAll('.partnamerect')
-	    		.filter(d => shouldPartNameRectBeHighlighted(selected_note_rects.data(), d))
-	    		.style('fill', 'yellow')
-	    		.style('fill-opacity', 0.5)
-	    	console.log(d_curr);
+	    	highlightNoteRectsAndPartNameRects(d_curr);
 	    })
 	    .on('mouseleave', function() {
 	    	if (curr_selected_note.id === -1) {
@@ -267,10 +311,9 @@ function initializeRectangleActions() {
 	    		return;
 	    	}
 	    	d3.select(this).style('stroke-width', 0);
-	    	// If the user clicked an already-selected note, unselect it and clear highlights.
+	    	// If the user clicked an already-selected note, unselect it.
 	    	if (curr_selected_note.id === d_curr.id) {
 	    		curr_selected_note = {id: -1};
-	    		clearAllHighlights();
 	    	}
 	    });
 };
