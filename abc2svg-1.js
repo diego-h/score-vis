@@ -10599,6 +10599,9 @@ function set_global() {
 
 /* -- return the left indentation of the staves -- */
 function set_indent() {
+
+	// return 0;
+
 	var	st, v, w, p_voice, p, i, j, font,
 		nv = voice_tb.length,
 		maxw = 0

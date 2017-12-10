@@ -17,7 +17,7 @@ typedef note {
 */
 var notes_glob = [];
 var curr_note_id = 0;
-var scale_factor = 2.0;
+var scale_factor = 1.0;
 var x_offset = 0;
 var view_dimensions = {
 	height: 1500,
@@ -255,11 +255,12 @@ function initializeRectangleActions() {
 
 	// Correct svg configurations.
 	x_offset = 0;
-	d3.select('svg').attr('viewBox', '0 0 ' + view_dimensions.width + ' ' + view_dimensions.height).attr('width', view_dimensions.width + 'px');
+	// d3.select('svg').attr('viewBox', '0 0 ' + view_dimensions.width + ' ' + view_dimensions.height).attr('width', view_dimensions.width + 'px');
 	d3.select('.music').attr('transform', 'scale(' + scale_factor + ')translate(' + x_offset + ', 0)');
 
 	// Add clip path.
 	d3.select('svg')
+	  .select('defs')
 	  .append('clipPath')
 	  .attr('id', 'score-clip')
 	  .append('rect')
