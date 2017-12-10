@@ -158,6 +158,9 @@ function moveOrScaleScore(index_delta, scale_factor_delta) {
 	  .attr('transform', 'scale(' + scale_factor + ')translate(' + (x_offset).toFixed(2) + ', 0)');
 	d3.select('#score-clip')
 	  .attr('transform', 'translate(' + (-x_offset) + ', 0)');
+
+	// TODO: this doesn't do what you want it to do. make it do what you want
+	d3.select('#notation').attr('height', document.getElementsByTagName('svg')[0].getBBox().height);
 }
 
 function clearAllHighlights() {
@@ -203,6 +206,12 @@ function advanceSelectedNote(index_delta) {
 
 function initializeRectangleActions() {
 	matchingNotesClasses = [];
+
+	// Disable score file selection (to select another file,
+	// user should reload the page to avoid bugs. Sorry not sorry.)
+	document.getElementById('abclbl').innerHTML = 'Refresh to load a different file.'
+	const file_input = document.getElementById('fknp');
+	file_input.parentNode.removeChild(file_input);
 
 	// Make rects to highlight part names.
 	d3.select('.music').selectAll('.partnamerect')
