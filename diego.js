@@ -50,6 +50,7 @@ var eflat_notename_conversions = {
 };
 var matchingNotesClasses = [];
 var parts_positions = []; // part_name, x_center, y
+var partnamerect_width = 120;
 
 function noteMatchesWithPart(note, part_name) {
 	for (var i = 0; i < notes_glob.length; i++) {
@@ -155,12 +156,16 @@ function moveOrScaleScore(index_delta, scale_factor_delta) {
 	scale_factor += scale_factor_delta;
 	x_offset = -score_position_info.measure_xcoords[score_position_info.current_measure];
 	d3.select('.music')
-	  .attr('transform', 'scale(' + scale_factor + ')translate(' + (x_offset).toFixed(2) + ', 0)');
+	  .attr('transform', 'scale(' + scale_factor + ')translate(' + (x_offset + partnamerect_width + +d3.select('.partnamerect').attr('x') + 5).toFixed(2) + ', 0)');
 	d3.select('#score-clip')
-	  .attr('transform', 'translate(' + (-x_offset) + ', 0)');
+	  .select('rect')
+	  .attr('transform', 'translate(' + -(x_offset) + ', 0)');
+	d3.select('#score-clip')
+	  .select('rect')
+	  .attr('width', view_dimensions.width / scale_factor);
+	d3.select('#parts-header').attr('transform', 'scale(' + scale_factor +')');
 
-	// TODO: this doesn't do what you want it to do. make it do what you want
-	d3.select('#notation').attr('height', document.getElementsByTagName('svg')[0].getBBox().height);
+	d3.select('#score-clip').select('rect').attr('height', 1.2 * parts_positions[parts_positions.length - 1].y);
 }
 
 function clearAllHighlights() {
@@ -207,6 +212,17 @@ function advanceSelectedNote(index_delta) {
 function initializeRectangleActions() {
 	matchingNotesClasses = [];
 
+	d3.select('svg').attr('id', 'music-svg');
+
+	d3.select('#music-svg').append('g')
+	  .attr('id', 'parts-header');
+	  // .attr('width', 400)
+	  // .attr('height', 25 + parts_positions.reduce((accumulator, current) => {
+   //        return current.y > accumulator ? current.y : accumulator;
+	  // }, 0))
+	  // .lower();
+
+
 	// Disable score file selection (to select another file,
 	// user should reload the page to avoid bugs. Sorry not sorry.)
 	document.getElementById('abclbl').innerHTML = 'Refresh to load a different file.'
@@ -214,17 +230,25 @@ function initializeRectangleActions() {
 	file_input.parentNode.removeChild(file_input);
 
 	// Make rects to highlight part names.
-	d3.select('.music').selectAll('.partnamerect')
+	d3.select('#parts-header').selectAll('.partnamerect')
 		.data(parts_positions)
 		.enter().append('rect')
 		.attr('class', 'partnamerect')
 		.attr('x', d => d.x_center - 60)
 		.attr('y', d => d.y - 13)
 		.attr('height', 20)
-		.attr('width', 120)
+		.attr('width', partnamerect_width)
 		.style('fill', 'white')
-		.style('fill-opacity', 0)
-		.lower();
+		.style('fill-opacity', 0);
+		//.lower();
+
+	parts_positions.forEach(part => d3.select('#parts-header')
+		.append('text')
+		.attr('class', 'f')
+		.attr('x', part.x_center)
+		.attr('y', part.y)
+		.attr('text-anchor', 'middle')
+		.text(d => part.part_name));
 
 	// Sort the array of notes by id.
 	notes_glob.sort((a,b) => +parseInt(a.id.substring(6)) - +parseInt(b.id.substring(6)));
@@ -244,22 +268,8 @@ function initializeRectangleActions() {
 	    sel.appendChild(opt);
 	}
 
-	// Dedup the array of measure xcoords.
-	score_position_info.measure_xcoords = score_position_info.measure_xcoords.filter(function(elem, index, self) {
-    	return index === self.indexOf(elem);
-	});
-	score_position_info.measure_xcoords.push(0); // For the beginning!
-	score_position_info.measure_xcoords.sort((a, b) => a - b);
-	score_position_info.current_measure = 0;
-	moveOrScaleScore(0, 0);
-
-	// Correct svg configurations.
-	x_offset = 0;
-	// d3.select('svg').attr('viewBox', '0 0 ' + view_dimensions.width + ' ' + view_dimensions.height).attr('width', view_dimensions.width + 'px');
-	d3.select('.music').attr('transform', 'scale(' + scale_factor + ')translate(' + x_offset + ', 0)');
-
 	// Add clip path.
-	d3.select('svg')
+	d3.select('#music-svg')
 	  .select('defs')
 	  .append('clipPath')
 	  .attr('id', 'score-clip')
@@ -267,9 +277,22 @@ function initializeRectangleActions() {
 	  .attr('height', view_dimensions.height)
 	  .attr('width', view_dimensions.width)
 	  .attr('transform', 'translate(0, 0)');
-	d3.select('svg')
+	d3.select('#music-svg')
 	  .select('.music')
 	  .attr('clip-path', 'url(#score-clip)');
+
+	// Dedup the array of measure xcoords.
+	score_position_info.measure_xcoords = score_position_info.measure_xcoords.filter(function(elem, index, self) {
+    	return index === self.indexOf(elem);
+	});
+	score_position_info.measure_xcoords.sort((a, b) => a - b);
+	score_position_info.current_measure = 0;
+	moveOrScaleScore(0, 0);
+
+	// Correct svg configurations.
+	// x_offset = 0;
+	// d3.select('svg').attr('viewBox', '0 0 ' + view_dimensions.width + ' ' + view_dimensions.height).attr('width', view_dimensions.width + 'px');
+	// d3.select('.music').attr('transform', 'scale(' + scale_factor + ')translate(' + x_offset + ', 0)');
 
 	const calculateNoteHighlightWidth = (d) => {
 		// return 15;
@@ -318,12 +341,16 @@ function initializeRectangleActions() {
 	    	if (curr_selected_note.id === -1) {
 	    		d3.select(this).style('stroke-width', 3).style('stroke', 'black');
 	    		curr_selected_note = d_curr;
+	    		d3.select('#prevnotebtn').attr('disabled', null);
+	    		d3.select('#nextnotebtn').attr('disabled', null);
 	    		return;
 	    	}
 	    	d3.select(this).style('stroke-width', 0);
 	    	// If the user clicked an already-selected note, unselect it.
 	    	if (curr_selected_note.id === d_curr.id) {
 	    		curr_selected_note = {id: -1};
+	    		d3.select('#prevnotebtn').attr('disabled', true);
+	    		d3.select('#nextnotebtn').attr('disabled', true);
 	    	}
 	    });
 };

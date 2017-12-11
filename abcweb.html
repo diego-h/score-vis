@@ -38,8 +38,8 @@ body { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -web
 #buttons  { height:10%; }
 #buttons.video { height:50%; }
 #notation { overflow:auto; }
-#err      { overflow:auto; margin:0px; height:5%; background-color: #eee; visibility:hidden; }
-#err:hover { height:  50%; width:100%; position:absolute; top:50%; }
+#err      { overflow:auto; margin:0px; height:0%; background-color: #eee; visibility:hidden; }
+#err:hover { height:  0%; width:100%; position:absolute; top:50%; }
 #streep   { position:absolute; background-color:#aaa; opacity:0.0; height:10px; width:100%; }
 #abcfile, #mediafile, #yubfile { display: inline-block; }
 .dlog      { display:none; background-color:lightblue; position:absolute; left:30%; top:30%; width:30%; padding:10px; }
@@ -97,8 +97,8 @@ body { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -web
         <button onclick="moveOrScaleScore(-1, 0)">Scroll back</button>
         <button onclick="moveOrScaleScore(1, 0)">Scroll forward</button>
         <select id="partselection" onchange="matchPart(parts[this.selectedIndex]);"></select>
-        <button onclick="advanceSelectedNote(-1)">Previous note</button>
-        <button onclick="advanceSelectedNote(1)">Next note</button>
+        <button id="prevnotebtn" onclick="advanceSelectedNote(-1)" disabled="true">Previous note</button>
+        <button id="nextnotebtn" onclick="advanceSelectedNote(1)" disabled="true">Next note</button>
     </div>
     <div id="meddiv">
         <audio id="aud" controls="controls">Your browser does not support the audio element.</audio>

@@ -14950,6 +14950,10 @@ function xy_str(x, y, str,
 			y: sy(y)
 		});
 	}
+
+	// Special treatment: get put into a new svg in the notation div.
+	if (is_vname) return;
+
 	output.push('<text class="f' + gene.curfont.fid + cfmt.fullsvg + '" x="');
 	out_sxsy(x, '" y="', y)
 	switch (action) {
@@ -16227,6 +16231,7 @@ function out_bar(x, y, h, dotted) {
 	if (score_position_info.measure_xcoords[score_position_info.measure_xcoords.length - 1] !== curr_xcoord ||
 		score_position_info.measure_xcoords.length === 0) {
 		score_position_info.measure_xcoords.push(curr_xcoord);
+		console.log('score_position adding ' + curr_xcoord);
 	}
 	output.push('<path class="stroke" stroke-width="1" ' +
 		(dotted ? 'stroke-dasharray="5,5" ' : '') +
@@ -16263,6 +16268,7 @@ function out_bracket(x, y, h) {
 	c10.5 1 12 -4.5 12 -3.5c0 1 -3.5 5.5 -8.5 5.5\n\
 	v' + h.toFixed(2) + '\n\
 	c5 0 8.5 4.5 8.5 5.5c0 1 -1.5 -4.5 -12 -3.5"/>\n')
+	score_position_info.measure_xcoords.push(x);
 }
 // hyphen
 function out_hyph(x, y, w) {
